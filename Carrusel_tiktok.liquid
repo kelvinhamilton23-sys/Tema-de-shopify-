@@ -1,0 +1,290 @@
+<style>
+  .tiktok-section-{{ section.id }} {
+    padding: 50px 0;
+    background: {{ section.settings.bg_color }};
+    font-family: sans-serif;
+    text-align: center;
+    overflow: hidden;
+  }
+  .tiktok-header-container {
+    max-width: 1200px;
+    margin: 0 auto 25px auto;
+    padding: 0 20px;
+  }
+  .tiktok-title { 
+    font-size: 26px; 
+    font-weight: 800; 
+    margin-bottom: 8px; 
+    color: {{ section.settings.title_color }}; 
+  }
+  .tiktok-sub { 
+    font-size: 14px; 
+    color: {{ section.settings.subtitle_color }}; 
+    margin: 0;
+  }
+  
+  /* Contenedor del Carrusel Horizontal */
+  .tiktok-carousel-wrapper {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  
+  .tiktok-carousel {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 4px 25px 4px;
+    scrollbar-width: none; /* Firefox */
+  }
+  .tiktok-carousel::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  .tiktok-card {
+    flex: 0 0 270px;
+    scroll-snap-align: start;
+    background: #000;
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 9/16;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    text-align: left;
+    user-select: none;
+  }
+
+  @media(min-width: 768px) {
+    .tiktok-card {
+      flex: 0 0 290px;
+    }
+  }
+
+  .tiktok-card video, .tiktok-card img {
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Gradiente inferior para textos legibles */
+  .tiktok-bottom-gradient {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Estética TikTok: Barra lateral derecha de interacciones */
+  .tiktok-sidebar {
+    position: absolute;
+    right: 12px;
+    bottom: 20px;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    color: #fff;
+  }
+
+  .tiktok-action-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+
+  .tiktok-action-icon {
+    width: 38px;
+    height: 38px;
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 3px;
+    transition: transform 0.2s ease;
+  }
+
+  .tiktok-action-item:active .tiktok-action-icon {
+    transform: scale(1.2);
+  }
+
+  .tiktok-action-count {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  /* Información del usuario y descripción abajo a la izquierda */
+  .tiktok-content-overlay {
+    position: absolute;
+    left: 14px;
+    bottom: 16px;
+    right: 75px; /* Espacio para que no choque con la barra lateral */
+    z-index: 3;
+    color: white;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  }
+
+  .tiktok-user { 
+    font-size: 13px; 
+    font-weight: 800; 
+    margin-bottom: 4px; 
+    display: block; 
+    color: #fff; 
+  }
+  
+  .tiktok-caption { 
+    font-size: 12px; 
+    line-height: 1.35; 
+    margin: 0; 
+    opacity: 0.95;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Botones de navegación del carrusel (Flechas opcionales en escritorio) */
+  .tiktok-nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .tiktok-nav-btn {
+    background: {{ section.settings.btn_bg }};
+    color: {{ section.settings.btn_color }};
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: background 0.2s;
+  }
+  .tiktok-nav-btn:hover {
+    opacity: 0.85;
+  }
+</style>
+
+<div class="tiktok-section-{{ section.id }}">
+  <div class="tiktok-header-container">
+    <h2 class="tiktok-title">{{ section.settings.title }}</h2>
+    {% if section.settings.subtitle != blank %}
+      <p class="tiktok-sub">{{ section.settings.subtitle }}</p>
+    {% endif %}
+  </div>
+
+  <div class="tiktok-carousel-wrapper">
+    <div class="tiktok-carousel" id="tiktok-carousel-{{ section.id }}">
+      {% for block in section.blocks %}
+        <div class="tiktok-card" {{ block.shopify_attributes }}>
+          {% if block.settings.video %}
+            {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true }}
+          {% elsif block.settings.image %}
+            <img src="{{ block.settings.image | image_url: width: 600 }}" alt="TikTok video" loading="lazy">
+          {% else %}
+            <div style="background:#222; width:100%; height:100%;"></div>
+          {% endif %}
+
+          <div class="tiktok-bottom-gradient"></div>
+
+          <!-- Estética TikTok: Botones de interacción al lado derecho -->
+          <div class="tiktok-sidebar">
+            <div class="tiktok-action-item">
+              <div class="tiktok-action-icon">❤️</div>
+              <span class="tiktok-action-count">{{ block.settings.likes }}</span>
+            </div>
+            <div class="tiktok-action-item">
+              <div class="tiktok-action-icon">💬</div>
+              <span class="tiktok-action-count">{{ block.settings.comments }}</span>
+            </div>
+            <div class="tiktok-action-item">
+              <div class="tiktok-action-icon">↗</div>
+              <span class="tiktok-action-count">Compartir</span>
+            </div>
+          </div>
+
+          <!-- Usuario y Descripción abajo a la izquierda -->
+          <div class="tiktok-content-overlay">
+            <span class="tiktok-user">@{{ block.settings.username }}</span>
+            <p class="tiktok-caption">{{ block.settings.caption }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if section.settings.show_arrows %}
+      <div class="tiktok-nav-buttons">
+        <button class="tiktok-nav-btn" onclick="document.getElementById('tiktok-carousel-{{ section.id }}').scrollBy({ left: -310, behavior: 'smooth' })">❮</button>
+        <button class="tiktok-nav-btn" onclick="document.getElementById('tiktok-carousel-{{ section.id }}').scrollBy({ left: 310, behavior: 'smooth' })">❯</button>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Carrusel Estilo TikTok",
+  "settings": [
+    { "type": "color", "id": "bg_color", "label": "Color de fondo de la sección", "default": "#0f172a" },
+    { "type": "text", "id": "title", "label": "Título Principal", "default": "Viral en TikTok" },
+    { "type": "color", "id": "title_color", "label": "Color del Título", "default": "#ffffff" },
+    { "type": "text", "id": "subtitle", "label": "Subtítulo", "default": "Desliza para ver por qué todo el mundo está obsesionado" },
+    { "type": "color", "id": "subtitle_color", "label": "Color del Subtítulo", "default": "#94a3b8" },
+    { "type": "header", "content": "Navegación por Botones" },
+    { "type": "checkbox", "id": "show_arrows", "label": "Mostrar flechas de desplazamiento", "default": true },
+    { "type": "color", "id": "btn_bg", "label": "Fondo de los botones de flecha", "default": "#ffffff" },
+    { "type": "color", "id": "btn_color", "label": "Color de las flechas", "default": "#000000" }
+  ],
+  "blocks": [
+    {
+      "type": "video_item",
+      "name": "Video TikTok",
+      "settings": [
+        { "type": "text", "id": "username", "label": "Usuario", "default": "valeria.tips" },
+        { "type": "textarea", "id": "caption", "label": "Descripción", "default": "¡Chicas! Llevo 2 semanas usando esto y es magia pura ✨ #skincare" },
+        { "type": "text", "id": "likes", "label": "Me gusta", "default": "14.3K" },
+        { "type": "text", "id": "comments", "label": "Comentarios", "default": "342" },
+        { "type": "video", "id": "video", "label": "Video MP4" },
+        { "type": "image_picker", "id": "image", "label": "Imagen de respaldo (si no hay video)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrusel Estilo TikTok",
+      "blocks": [
+        { "type": "video_item" },
+        { "type": "video_item" },
+        { "type": "video_item" },
+        { "type": "video_item" }
+      ]
+    }
+  ]
+}
+{% endschema %}
