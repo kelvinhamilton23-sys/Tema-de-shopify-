@@ -1,0 +1,146 @@
+<style>
+  .micro-reviews-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: {{ section.settings.margin_bottom }}px;
+    font-family: inherit;
+    flex-wrap: wrap;
+  }
+
+  .micro-reviews-avatars {
+    display: flex;
+    align-items: center;
+  }
+
+  .micro-avatar {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    object-fit: cover;
+    margin-left: -8px;
+  }
+
+  .micro-avatar:first-child {
+    margin-left: 0;
+  }
+
+  .micro-reviews-stars {
+    color: {{ section.settings.stars_color }};
+    font-size: 13px;
+    letter-spacing: 1px;
+    line-height: 1;
+  }
+
+  .micro-reviews-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: {{ section.settings.text_color }};
+    text-decoration: none;
+  }
+
+  .micro-reviews-text:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="micro-reviews-{{ section.id }}" {{ section.shopify_attributes }}>
+  <div class="micro-reviews-avatars">
+    {% if section.settings.avatar_1 != blank %}
+      <img src="{{ section.settings.avatar_1 | image_url: width: 60 }}" alt="Reviewer" class="micro-avatar" loading="lazy">
+    {% endif %}
+    {% if section.settings.avatar_2 != blank %}
+      <img src="{{ section.settings.avatar_2 | image_url: width: 60 }}" alt="Reviewer" class="micro-avatar" loading="lazy">
+    {% endif %}
+    {% if section.settings.avatar_3 != blank %}
+      <img src="{{ section.settings.avatar_3 | image_url: width: 60 }}" alt="Reviewer" class="micro-avatar" loading="lazy">
+    {% endif %}
+    {% if section.settings.avatar_4 != blank %}
+      <img src="{{ section.settings.avatar_4 | image_url: width: 60 }}" alt="Reviewer" class="micro-avatar" loading="lazy">
+    {% endif %}
+  </div>
+
+  <div style="display: flex; align-items: center; gap: 5px;">
+    <span class="micro-reviews-stars">★★★★★</span>
+    <a href="{{ section.settings.link }}" class="micro-reviews-text">
+      {{ section.settings.rating_text }}
+    </a>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Barra Fina de Resenas",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "rating_text",
+      "label": "Texto de Puntuacion",
+      "default": "(4.8/5 - 15.000+ Reviews)"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Enlace al hacer clic"
+    },
+    {
+      "type": "header",
+      "content": "Fotos de Perfil (Avatares)"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_1",
+      "label": "Avatar 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_2",
+      "label": "Avatar 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_3",
+      "label": "Avatar 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "avatar_4",
+      "label": "Avatar 4"
+    },
+    {
+      "type": "header",
+      "content": "Estilos y Colores"
+    },
+    {
+      "type": "color",
+      "id": "stars_color",
+      "label": "Color de las Estrellas",
+      "default": "#ffb800"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del Texto",
+      "default": "#333333"
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Espacio inferior",
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barra Fina de Resenas"
+    }
+  ]
+}
+{% endschema %}
