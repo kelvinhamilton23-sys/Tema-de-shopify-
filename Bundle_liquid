@@ -1,0 +1,402 @@
+<style>
+  :root {
+    --bundle-primary-{{ section.id }}: {{ section.settings.accent_color }};
+    --bundle-text-{{ section.id }}: {{ section.settings.text_color }};
+    --bundle-bg-{{ section.id }}: {{ section.settings.bg_color }};
+  }
+
+  .bundle-section-{{ section.id }} {
+    padding: 30px 15px;
+    background-color: var(--bundle-bg-{{ section.id }});
+    font-family: inherit;
+  }
+
+  .bundle-container {
+    max-width: 650px;
+    margin: 0 auto;
+  }
+
+  .bundle-header {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .bundle-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--bundle-text-{{ section.id }});
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .bundle-subtitle {
+    font-size: 14px;
+    color: var(--bundle-text-{{ section.id }});
+    opacity: 0.8;
+  }
+
+  .bundle-options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .bundle-card {
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  .bundle-card:hover {
+    border-color: var(--bundle-primary-{{ section.id }});
+  }
+
+  .bundle-card.selected {
+    border-color: var(--bundle-primary-{{ section.id }});
+    background-color: rgba(var(--bundle-primary-rgb-{{ section.id }}), 0.02);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  }
+
+  {% assign p_color = section.settings.accent_color %}
+  .bundle-section-{{ section.id }} {
+    --bundle-primary-rgb-{{ section.id }}: {{ p_color | color_extract: 'red' }}, {{ p_color | color_extract: 'green' }}, {{ p_color | color_extract: 'blue' }};
+  }
+
+  .bundle-badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: var(--bundle-primary-{{ section.id }});
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .bundle-card-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .bundle-radio {
+    width: 22px;
+    height: 22px;
+    accent-color: var(--bundle-primary-{{ section.id }});
+    flex-shrink: 0;
+  }
+
+  .bundle-info {
+    flex-grow: 1;
+  }
+
+  .bundle-main-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+  }
+
+  .bundle-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111;
+  }
+
+  .bundle-pricing {
+    text-align: right;
+  }
+
+  .bundle-price {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111;
+  }
+
+  .bundle-compare-price {
+    font-size: 13px;
+    text-decoration: line-through;
+    color: #888;
+    margin-left: 6px;
+  }
+
+  .bundle-desc {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 10px;
+  }
+
+  .bundle-gifts {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    border: 1px dashed #cbd5e1;
+  }
+
+  .bundle-gift-img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    flex-shrink: 0;
+  }
+
+  .bundle-gift-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  .bundle-add-btn {
+    width: 100%;
+    margin-top: 20px;
+    background-color: var(--bundle-primary-{{ section.id }});
+    color: #ffffff;
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: filter 0.2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  }
+
+  .bundle-add-btn:hover {
+    filter: brightness(1.1);
+  }
+
+  @media screen and (max-width: 480px) {
+    .bundle-card { padding: 15px; }
+    .bundle-name { font-size: 15px; }
+    .bundle-price { font-size: 16px; }
+  }
+</style>
+
+<div class="bundle-section-{{ section.id }}">
+  <div class="bundle-container">
+    
+    {% if section.settings.title != blank %}
+      <div class="bundle-header">
+        <h2 class="bundle-title">{{ section.settings.title }}</h2>
+        {% if section.settings.subtitle != blank %}
+          <p class="bundle-subtitle">{{ section.settings.subtitle }}</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <form action="/cart/add" method="post" id="BundleForm-{{ section.id }}">
+      <div class="bundle-options-grid">
+        
+        {% for block in section.blocks %}
+          {%- assign prod = block.settings.product_item -%}
+          <div class="bundle-card {% if forloop.first %}selected{% endif %}" onclick="selectBundle(this, 'radio-{{ block.id }}')">
+            
+            {% if block.settings.badge_text != blank %}
+              <div class="bundle-badge">{{ block.settings.badge_text }}</div>
+            {% endif %}
+
+            <div class="bundle-card-content">
+              <input type="radio" 
+                     id="radio-{{ block.id }}" 
+                     name="id" 
+                     value="{% if prod != blank %}{{ prod.selected_or_first_available_variant.id }}{% else %}404{% endif %}" 
+                     class="bundle-radio"
+                     {% if forloop.first %}checked{% endif %}>
+
+              <div class="bundle-info">
+                <div class="bundle-main-row">
+                  <span class="bundle-name">{{ block.settings.bundle_name }}</span>
+                  <div class="bundle-pricing">
+                    <span class="bundle-price">
+                      {% if prod != blank %}
+                        {{ prod.selected_or_first_available_variant.price | money }}
+                      {% else %}
+                        $0.00
+                      {% endif %}
+                    </span>
+                    {% if prod != blank and prod.selected_or_first_available_variant.compare_at_price > prod.selected_or_first_available_variant.price %}
+                      <span class="bundle-compare-price">{{ prod.selected_or_first_available_variant.compare_at_price | money }}</span>
+                    {% endif %}
+                  </div>
+                </div>
+
+                {% if block.settings.description != blank %}
+                  <div class="bundle-desc">{{ block.settings.description }}</div>
+                {% endif %}
+
+                {% if block.settings.gift_text != blank %}
+                  <div class="bundle-gifts">
+                    {% if block.settings.gift_image != blank %}
+                      <img src="{{ block.settings.gift_image | image_url: width: 80 }}" class="bundle-gift-img" alt="Regalo">
+                    {% endif %}
+                    <span class="bundle-gift-text">🎁 {{ block.settings.gift_text }}</span>
+                  </div>
+                {% endif %}
+
+              </div>
+            </div>
+
+          </div>
+        {% endfor %}
+
+      </div>
+
+      <button type="submit" class="bundle-add-btn">
+        {{ section.settings.btn_text }}
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  function selectBundle(cardElement, radioId) {
+    const allCards = cardElement.closest('.bundle-options-grid').querySelectorAll('.bundle-card');
+    allCards.forEach(c => c.classList.remove('selected'));
+    cardElement.classList.add('selected');
+    const radio = document.getElementById(radioId);
+    if (radio) {
+      radio.checked = true;
+    }
+  }
+</script>
+
+{% schema %}
+{
+  "name": "Bundles de Oferta Elite",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título Principal",
+      "default": "Selecciona tu Oferta y Ahorra"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Cuantas más unidades llevas, mayor es el descuento y tus regalos."
+    },
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Texto del Botón de Compra",
+      "default": "¡Aprovechar Oferta y Comprar Ahora!"
+    },
+    {
+      "type": "header",
+      "content": "Estilos y Colores"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Color Principal (Botones y Etiquetas)",
+      "default": "#22c55e"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Color de Fondo de la Sección",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de Texto General",
+      "default": "#111111"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bundle_tier",
+      "name": "Nivel de Oferta (Bundle)",
+      "settings": [
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Etiqueta Destacada (Ej: MÁS POPULAR)",
+          "default": "MÁS POPULAR - 25% OFF"
+        },
+        {
+          "type": "text",
+          "id": "bundle_name",
+          "label": "Nombre del Paquete",
+          "default": "Lleva 2 Unidades (Pack Dúo)"
+        },
+        {
+          "type": "product",
+          "id": "product_item",
+          "label": "Selecciona el Producto/Pack correspondiente"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Breve descripción de beneficio",
+          "default": "Ideal para regalar o uso continuo."
+        },
+        {
+          "type": "header",
+          "content": "Sección de Regalos (Opcional)"
+        },
+        {
+          "type": "text",
+          "id": "gift_text",
+          "label": "Texto del Regalo Incluido",
+          "default": "Incluye Envío Gratis + Ebook de Regalo"
+        },
+        {
+          "type": "image_picker",
+          "id": "gift_image",
+          "label": "Foto del Regalo o Bono"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bundles de Oferta Elite",
+      "blocks": [
+        {
+          "type": "bundle_tier",
+          "settings": {
+            "badge_text": "Prueba",
+            "bundle_name": "Lleva 1 Unidad"
+          }
+        },
+        {
+          "type": "bundle_tier",
+          "settings": {
+            "badge_text": "Más Popular / 20% OFF",
+            "bundle_name": "Lleva 2 Unidades (Pack Dúo)"
+          }
+        },
+        {
+          "type": "bundle_tier",
+          "settings": {
+            "badge_text": "Mejor Valor / Envío Gratis",
+            "bundle_name": "Lleva 3 Unidades (Pack Familiar)"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
