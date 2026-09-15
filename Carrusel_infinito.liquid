@@ -1,0 +1,290 @@
+<style>
+  .auto-scroll-wrapper-{{ section.id }} {
+    width: 100%;
+    overflow: hidden;
+    padding: {{ section.settings.padding_y }}px 0;
+    display: flex;
+    flex-direction: column;
+    background-color: {{ section.settings.bg_color }};
+  }
+
+  /* Estilos del nuevo encabezado */
+  .auto-media-header {
+    text-align: {{ section.settings.text_align }};
+    margin-bottom: 30px;
+    padding: 0 20px;
+    max-width: 1200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .auto-media-title {
+    font-size: 28px;
+    font-weight: 800;
+    color: {{ section.settings.title_color }};
+    margin: 0 0 10px 0;
+  }
+  .auto-media-subtitle {
+    font-size: 15px;
+    color: {{ section.settings.subtitle_color }};
+    opacity: 0.9;
+    margin: 0;
+  }
+
+  .scrolling-track {
+    display: flex;
+    width: max-content;
+    /* La velocidad se controla desde la configuración de la sección */
+    animation: scroll-left {{ section.settings.speed }}s linear infinite;
+  }
+  
+  /* Pausa la animación si el usuario pone el cursor encima */
+  .auto-scroll-wrapper-{{ section.id }}:hover .scrolling-track {
+    animation-play-state: paused;
+  }
+  
+  .scrolling-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
+  
+  .scrolling-item {
+    width: {{ section.settings.item_width }}px;
+    margin: 0 {{ section.settings.gap }}px;
+    flex-shrink: 0;
+    border-radius: {{ section.settings.border_radius }}px;
+    overflow: hidden;
+    display: flex;
+    position: relative;
+    /* Mantiene la proporción vertical recomendada para móviles */
+    aspect-ratio: 4 / 5; 
+  }
+  
+  .scrolling-item img, 
+  .scrolling-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-radius: {{ section.settings.border_radius }}px;
+  }
+  
+  .placeholder-box {
+    width: 100%;
+    height: 100%;
+    background: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-family: sans-serif;
+  }
+  
+  @keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  
+  /* Ajustes para móviles */
+  @media screen and (max-width: 768px) {
+    .scrolling-item {
+      width: {{ section.settings.item_width_mobile }}px;
+    }
+  }
+</style>
+
+<div class="auto-scroll-wrapper-{{ section.id }}">
+  
+  <!-- Nuevo Encabezado -->
+  {% if section.settings.title != blank or section.settings.subtitle != blank %}
+    <div class="auto-media-header">
+      {% if section.settings.title != blank %}
+        <h2 class="auto-media-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.subtitle != blank %}
+        <p class="auto-media-subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="scrolling-track">
+    
+    {%- capture carousel_content -%}
+      {% for block in section.blocks %}
+        <div class="scrolling-item" {{ block.shopify_attributes }}>
+          
+          {% if block.type == 'image' %}
+            {% if block.settings.image != blank %}
+              <img src="{{ block.settings.image | image_url: width: 600 }}" alt="{{ block.settings.image.alt | escape }}" loading="lazy">
+            {% else %}
+              {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+            {% endif %}
+            
+          {% elsif block.type == 'video' %}
+            {% if block.settings.video != blank %}
+              {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: false, playsinline: true }}
+            {% else %}
+              <div class="placeholder-box">Añade un video</div>
+            {% endif %}
+          {% endif %}
+          
+        </div>
+      {% endfor %}
+    {%- endcapture -%}
+
+    <!-- Duplicamos el contenido para crear la ilusión de bucle sin cortes -->
+    <div class="scrolling-content">{{ carousel_content }}</div>
+    <div class="scrolling-content">{{ carousel_content }}</div>
+    
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Carrusel Infinito",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Textos del Encabezado"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título Principal",
+      "default": "Míralo en Acción"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color del Título",
+      "default": "#111111"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Desliza para ver más resultados de nuestros clientes."
+    },
+    {
+      "type": "color",
+      "id": "subtitle_color",
+      "label": "Color del Subtítulo",
+      "default": "#555555"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Alineación del texto",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Configuración del Carrusel"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Color de fondo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "speed",
+      "min": 10,
+      "max": 100,
+      "step": 2,
+      "unit": "s",
+      "label": "Tiempo de animación (Mayor = Más lento)",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "item_width",
+      "min": 150,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "label": "Ancho de la imagen/video (Desktop)",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "item_width_mobile",
+      "min": 100,
+      "max": 350,
+      "step": 10,
+      "unit": "px",
+      "label": "Ancho de la imagen/video (Móvil)",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "label": "Espacio entre elementos",
+      "default": 15
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "label": "Redondeo de bordes",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Espaciado arriba y abajo",
+      "default": 50
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image",
+      "name": "Imagen o GIF",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Selecciona una Imagen o GIF"
+        }
+      ]
+    },
+    {
+      "type": "video",
+      "name": "Video",
+      "settings": [
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Selecciona un Video de Shopify"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrusel Infinito"
+    }
+  ]
+}
+{% endschema %}
