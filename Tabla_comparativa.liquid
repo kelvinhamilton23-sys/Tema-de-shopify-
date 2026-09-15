@@ -1,0 +1,366 @@
+<style>
+  :root {
+    --bg-section-{{ section.id }}: {{ section.settings.bg_color }};
+    --color-us-{{ section.id }}: {{ section.settings.our_color }};
+    --color-them-{{ section.id }}: {{ section.settings.their_color }};
+    --text-main-{{ section.id }}: {{ section.settings.text_color }};
+    --border-color-{{ section.id }}: rgba(0, 0, 0, 0.12); /* Color de las líneas de la tabla */
+  }
+
+  .compare-section-{{ section.id }} {
+    padding: {{ section.settings.padding_y }}px 20px;
+    background-color: var(--bg-section-{{ section.id }});
+    font-family: sans-serif;
+  }
+
+  /* Encabezado */
+  .compare-header {
+    text-align: {{ section.settings.text_align }};
+    max-width: 800px;
+    margin: 0 auto 40px auto;
+  }
+  .compare-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-main-{{ section.id }});
+    margin-bottom: 15px;
+    line-height: 1.2;
+  }
+  .compare-subtitle {
+    font-size: 16px;
+    color: var(--text-main-{{ section.id }});
+    opacity: 0.8;
+    margin: 0;
+  }
+
+  /* Contenedor de la Tabla */
+  .compare-wrapper {
+    max-width: 850px;
+    margin: 0 auto;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  /* Cuadrícula a prueba de balas */
+  .compare-grid {
+    display: grid;
+    /* Columna 1 más ancha, columnas 2 y 3 iguales */
+    grid-template-columns: minmax(200px, 2fr) 1fr 1fr;
+    width: 100%;
+    min-width: 600px; /* Evita que se aplaste en móviles */
+    background: #ffffff;
+    border: 1px solid var(--border-color-{{ section.id }});
+    border-radius: 12px;
+    overflow: hidden; /* Mantiene los bordes redondeados */
+  }
+
+  /* Celdas (Recuadros y líneas) */
+  .c-cell {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center; /* CENTRADO VERTICAL ABSOLUTO */
+    justify-content: center; /* Centrado horizontal por defecto */
+    font-size: 15px;
+    color: var(--text-main-{{ section.id }});
+    border-bottom: 1px solid var(--border-color-{{ section.id }});
+    border-right: 1px solid var(--border-color-{{ section.id }});
+  }
+
+  /* Quitamos el borde derecho a la última columna (Ellos) */
+  .c-cell:nth-child(3n) {
+    border-right: none;
+  }
+
+  /* Quitamos el borde inferior a la última fila */
+  .c-cell:nth-last-child(-n+3) {
+    border-bottom: none;
+  }
+
+  /* Textos de las características (Columna 1) */
+  .c-cell-feature {
+    justify-content: flex-start; /* Alineado a la izquierda */
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* Cabeceras de columna */
+  .c-header {
+    font-weight: 800;
+    font-size: 18px;
+    text-transform: uppercase;
+    padding: 24px 15px;
+    background-color: rgba(0,0,0,0.02); /* Fondo sutil para diferenciar la cabecera */
+  }
+  .c-header-us {
+    color: var(--color-us-{{ section.id }});
+  }
+  .c-header-them {
+    color: var(--color-them-{{ section.id }});
+    opacity: 0.7;
+  }
+
+  /* Iconos SVG */
+  .icon-check, .icon-cross {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+  }
+  .icon-check { color: var(--color-us-{{ section.id }}); }
+  .icon-cross { color: var(--color-them-{{ section.id }}); opacity: 0.4; }
+
+  /* =========================================
+     ESTILO 1: TARJETA CON SOMBRA Y RECORTES
+  ========================================= */
+  .style-modern {
+    box-shadow: 0 12px 35px rgba(0,0,0,0.06);
+    border: none;
+  }
+  .style-modern .c-cell {
+    border-color: rgba(0,0,0,0.06);
+  }
+
+  /* =========================================
+     ESTILO 2: TABLA CLÁSICA (Líneas Fuertes)
+  ========================================= */
+  .style-classic {
+    border: 2px solid rgba(0,0,0,0.15);
+    box-shadow: none;
+  }
+  .style-classic .c-cell {
+    border-color: rgba(0,0,0,0.15);
+  }
+
+  /* =========================================
+     ESTILO 3: COLUMNA RESALTADA (Nosotros en color)
+  ========================================= */
+  .style-highlight .col-us, 
+  .style-highlight .c-header-us {
+    background-color: rgba(var(--color-us-rgb-{{ section.id }}), 0.1);
+  }
+  
+  /* Truco para extraer RGB del color hexadecimal en Shopify (Avanzado) */
+  {% assign us_color = section.settings.our_color %}
+  {% assign color_r = us_color | color_extract: 'red' %}
+  {% assign color_g = us_color | color_extract: 'green' %}
+  {% assign color_b = us_color | color_extract: 'blue' %}
+  
+  .style-highlight {
+    --color-us-rgb-{{ section.id }}: {{ color_r }}, {{ color_g }}, {{ color_b }};
+  }
+
+  .style-highlight .c-header-us {
+    background-color: var(--color-us-{{ section.id }});
+    color: #ffffff;
+  }
+  
+  .style-highlight .col-us {
+    background-color: rgba(var(--color-us-rgb-{{ section.id }}), 0.08);
+  }
+
+  /* Ajustes Móviles */
+  @media screen and (max-width: 768px) {
+    .compare-title { font-size: 24px; }
+    .compare-wrapper::-webkit-scrollbar {
+      height: 5px;
+    }
+    .compare-wrapper::-webkit-scrollbar-thumb {
+      background-color: rgba(0,0,0,0.15);
+      border-radius: 10px;
+    }
+    .c-cell {
+      padding: 12px 15px;
+      font-size: 14px;
+    }
+  }
+</style>
+
+<div class="compare-section-{{ section.id }}">
+  
+  <!-- Encabezado -->
+  {% if section.settings.title != blank or section.settings.subtitle != blank %}
+    <div class="compare-header">
+      {% if section.settings.title != blank %}
+        <h2 class="compare-title">{{ section.settings.title }}</h2>
+      {% endif %}
+      {% if section.settings.subtitle != blank %}
+        <p class="compare-subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Tabla -->
+  <div class="compare-wrapper">
+    <!-- El contenedor padre maneja la cuadrícula directamente -->
+    <div class="compare-grid style-{{ section.settings.table_style }}">
+      
+      <!-- Cabeceras (Siempre son los primeros 3 elementos) -->
+      <div class="c-cell c-header"></div>
+      <div class="c-cell c-header c-header-us">{{ section.settings.our_brand }}</div>
+      <div class="c-cell c-header c-header-them">{{ section.settings.their_brand }}</div>
+
+      <!-- Filas (Bloques generados uno por uno) -->
+      {% for block in section.blocks %}
+        
+        <!-- Celda 1: Texto -->
+        <div class="c-cell c-cell-feature" {{ block.shopify_attributes }}>
+          {{ block.settings.feature_text }}
+        </div>
+        
+        <!-- Celda 2: Nosotros -->
+        <div class="c-cell col-us">
+          {% if block.settings.us_has %}
+            <svg class="icon-check" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+          {% else %}
+            <svg class="icon-cross" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          {% endif %}
+        </div>
+        
+        <!-- Celda 3: Competencia -->
+        <div class="c-cell col-them">
+          {% if block.settings.them_has %}
+            <svg class="icon-check" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+          {% else %}
+            <svg class="icon-cross" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+          {% endif %}
+        </div>
+
+      {% endfor %}
+
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Tabla Comparativa",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Textos del Encabezado"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Título",
+      "default": "¿Por qué elegirnos?"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtítulo",
+      "default": "Mira cómo superamos a las alternativas tradicionales del mercado."
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Alineación del encabezado",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "header",
+      "content": "Diseño y Estilos"
+    },
+    {
+      "type": "select",
+      "id": "table_style",
+      "label": "Estilo Visual de la Tabla",
+      "options": [
+        { "value": "modern", "label": "Tarjeta Moderna (Sombra suave)" },
+        { "value": "classic", "label": "Tabla Clásica (Líneas Marcadas)" },
+        { "value": "highlight", "label": "Columna Resaltada (Foco en tu marca)" }
+      ],
+      "default": "modern"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Color de fondo de la sección",
+      "default": "#fafafa"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del texto general",
+      "default": "#111111"
+    },
+    {
+      "type": "header",
+      "content": "Nombres y Colores de Marca"
+    },
+    {
+      "type": "text",
+      "id": "our_brand",
+      "label": "Nombre de TU Marca",
+      "default": "Nosotros"
+    },
+    {
+      "type": "color",
+      "id": "our_color",
+      "label": "Color de TU Marca (Checkmarks)",
+      "default": "#22c55e"
+    },
+    {
+      "type": "text",
+      "id": "their_brand",
+      "label": "Nombre de la Competencia",
+      "default": "Ellos"
+    },
+    {
+      "type": "color",
+      "id": "their_color",
+      "label": "Color de la Competencia",
+      "default": "#94a3b8"
+    },
+    {
+      "type": "range",
+      "id": "padding_y",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Espaciado superior e inferior",
+      "default": 60
+    }
+  ],
+  "blocks": [
+    {
+      "type": "row",
+      "name": "Fila de Característica",
+      "settings": [
+        {
+          "type": "text",
+          "id": "feature_text",
+          "label": "Beneficio o Característica",
+          "default": "Escribe aquí tu beneficio"
+        },
+        {
+          "type": "checkbox",
+          "id": "us_has",
+          "label": "✅ ¿Nuestra marca lo tiene?",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "them_has",
+          "label": "❌ ¿La competencia lo tiene?",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tabla Comparativa Moderna",
+      "blocks": [
+        { "type": "row", "settings": { "feature_text": "Materiales de primera calidad" } },
+        { "type": "row", "settings": { "feature_text": "Soporte 24/7" } },
+        { "type": "row", "settings": { "feature_text": "Envío rápido garantizado" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
