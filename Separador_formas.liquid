@@ -1,0 +1,175 @@
+<style>
+  :root {
+    --sep-bg-{{ section.id }}: {{ section.settings.bg_color }};
+    --sep-fill-{{ section.id }}: {{ section.settings.shape_color }};
+  }
+
+  .shape-divider-section-{{ section.id }} {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    background-color: var(--sep-bg-{{ section.id }});
+  }
+
+  .shape-divider-section-{{ section.id }} svg {
+    display: block;
+    width: 100%;
+    height: {{ section.settings.height }}px;
+  }
+
+  .position-top {
+    transform: scaleY(-1);
+  }
+
+  .flip-horizontal svg {
+    transform: scaleX(-1);
+  }
+
+  @media screen and (max-width: 768px) {
+    .shape-divider-section-{{ section.id }} svg {
+      height: calc({{ section.settings.height }}px * 0.6);
+    }
+  }
+</style>
+
+<div class="shape-divider-section-{{ section.id }} {% if section.settings.position == 'top' %}position-top{% endif %} {% if section.settings.flip_h %}flip-horizontal{% endif %}">
+  
+  {% case section.settings.shape_style %}
+    {% when 'wave' %}
+      <!-- 1. Ondas Suaves -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,00321.39,56.44Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'melt' %}
+      <!-- 2. Derretido / Líquido -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'slant' %}
+      <!-- 3. Corte Diagonal -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M1200 0L0 120V120H1200V0Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'curves' %}
+      <!-- 4. Curva Elegante -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0 C300,90 900,90 1200,0 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'triangle' %}
+      <!-- 5. Dientes de Sierra -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,0 L600,120 L1200,0 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'curve_inv' %}
+      <!-- 6. Curva Invertida (Arco hacia arriba) -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,120 C300,30 900,30 1200,120 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'mountains' %}
+      <!-- 7. Picos de Montaña -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,120 L300,30 L600,120 L900,10 L1200,120 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'double_wave' %}
+      <!-- 8. Ondas Dobles Superpuestas -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,30 C150,90 350,-20 500,40 C650,100 900,10 1200,50 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})" opacity="0.6"></path>
+        <path d="M0,70 C200,20 400,100 600,50 C800,0 1000,90 1200,30 L1200,120 L0,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'steps' %}
+      <!-- 9. Escalón Moderno -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,120 L0,60 L300,60 L300,20 L600,20 L600,80 L900,80 L900,40 L1200,40 L1200,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+
+    {% when 'oval' %}
+      <!-- 10. Corte Ovalado Suave -->
+      <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+        <path d="M0,120 C400,0 800,0 1200,120 Z" fill="var(--sep-fill-{{ section.id }})"></path>
+      </svg>
+      
+  {% endcase %}
+
+</div>
+
+{% schema %}
+{
+  "name": "Separador de Formas",
+  "settings": [
+    {
+      "type": "select",
+      "id": "shape_style",
+      "label": "Estilo del Separador (10 Opciones)",
+      "options": [
+        { "value": "wave", "label": "1. Ondas Suaves" },
+        { "value": "melt", "label": "2. Efecto Derretido / Líquido" },
+        { "value": "slant", "label": "3. Corte Diagonal / Inclinado" },
+        { "value": "curves", "label": "4. Curva Elegante" },
+        { "value": "triangle", "label": "5. Dientes de Sierra" },
+        { "value": "curve_inv", "label": "6. Curva Invertida (Arco)" },
+        { "value": "mountains", "label": "7. Picos de Montaña" },
+        { "value": "double_wave", "label": "8. Ondas Dobles Superpuestas" },
+        { "value": "steps", "label": "9. Escalón Moderno" },
+        { "value": "oval", "label": "10. Corte Ovalado Suave" }
+      ],
+      "default": "wave"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Orientación del separador",
+      "options": [
+        { "value": "bottom", "label": "Hacia Abajo (Base de sección)" },
+        { "value": "top", "label": "Hacia Arriba (Techo de sección)" }
+      ],
+      "default": "bottom"
+    },
+    {
+      "type": "checkbox",
+      "id": "flip_h",
+      "label": "Invertir horizontalmente (Modo Espejo)",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "height",
+      "min": 40,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "label": "Altura del separador",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Colores"
+    },
+    {
+      "type": "color",
+      "id": "shape_color",
+      "label": "Color de la Forma (Figura)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Color de Fondo Trasero",
+      "default": "#fafafa"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Separador de Formas"
+    }
+  ]
+}
+{% endschema %}
