@@ -1,38 +1,44 @@
 <style>
   .reviews-section-{{ section.id }} {
     padding: 50px 20px;
-    background-color: {{ section.settings.bg_color }};
-    font-family: sans-serif;
+    background-color: {{ section.settings.bg_color }} !important;
+    font-family: {{ section.settings.font_family }};
     text-align: center;
   }
   .reviews-title {
     font-size: 28px;
     font-weight: 800;
-    margin-bottom: 15px;
+    margin-top: 0;
+    margin-bottom: {{ section.settings.header_spacing }}px;
     color: #333;
+    line-height: 1.2;
   }
   .global-rating {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
-    margin-bottom: 5px;
+    margin-bottom: {{ section.settings.header_spacing }}px;
   }
   .global-score {
     font-size: 32px;
     font-weight: 900;
     color: #333;
+    line-height: 1;
   }
   .global-stars {
     color: #eab308;
     font-size: 22px;
     letter-spacing: 2px;
+    line-height: 1;
   }
   .reviews-subtitle {
     font-size: 13px;
     color: #666;
-    margin-bottom: 40px;
+    margin-top: 0;
+    margin-bottom: {{ section.settings.subtitle_margin }}px;
     font-weight: 600;
+    line-height: 1.3;
   }
   .reviews-grid {
     display: grid;
@@ -48,23 +54,60 @@
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
   .review-stars {
     color: #eab308;
     font-size: 16px;
     margin-bottom: 10px;
+    letter-spacing: 1px;
   }
   .review-text {
     font-size: 15px;
     color: #444;
     line-height: 1.5;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     font-style: italic;
+  }
+  .review-image-container {
+    margin-bottom: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background: #f4f4f4;
+    width: 100%;
+  }
+  .review-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .review-product-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    padding: 8px 10px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    font-size: 12px;
+    color: #555;
+    font-weight: 500;
+  }
+  .review-product-tag img {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    object-fit: cover;
   }
   .review-author-area {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: auto;
   }
   .review-avatar {
     width: 40px;
@@ -77,6 +120,14 @@
     justify-content: center;
     font-weight: bold;
     font-size: 18px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .review-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   .review-info {
     display: flex;
@@ -95,7 +146,7 @@
     align-items: center;
     gap: 4px;
   }
-{% endstyle %}
+</style>
 
 <div class="reviews-section-{{ section.id }}">
   <h2 class="reviews-title">{{ section.settings.title }}</h2>
@@ -109,16 +160,56 @@
   <div class="reviews-grid">
     {% for block in section.blocks %}
       <div class="review-card" {{ block.shopify_attributes }}>
-        <div class="review-stars">
-          {% assign rating = block.settings.rating | times: 1 %}
-          {% for i in (1..rating) %}★{% endfor %}
+        <div>
+          <!-- Estrellas ARRIBA del texto e imagen -->
+          {% if section.settings.stars_position != 'below' %}
+            <div class="review-stars">
+              {% assign rating = block.settings.rating | times: 1 %}
+              {% for i in (1..5) %}
+                {% if i <= rating %}★{% else %}☆{% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+          
+          <p class="review-text">"{{ block.settings.text }}"</p>
+
+          <!-- Foto adjunta al comentario -->
+          {% if block.settings.review_image != blank %}
+            <div class="review-image-container">
+              <img src="{{ block.settings.review_image | image_url: width: 600 }}" alt="Foto del cliente" loading="lazy">
+            </div>
+          {% endif %}
+
+          <!-- Estrellas ABAJO de la imagen -->
+          {% if section.settings.stars_position == 'below' %}
+            <div class="review-stars">
+              {% assign rating = block.settings.rating | times: 1 %}
+              {% for i in (1..5) %}
+                {% if i <= rating %}★{% else %}☆{% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <!-- Foto y nombre del producto en la reseña -->
+          {% if section.settings.show_product_tag %}
+            {% if block.settings.product_image != blank or block.settings.product_name != blank %}
+              <div class="review-product-tag">
+                {% if block.settings.product_image != blank %}
+                  <img src="{{ block.settings.product_image | image_url: width: 100 }}" alt="Producto" loading="lazy">
+                {% endif %}
+                <span>{{ block.settings.product_name }}</span>
+              </div>
+            {% endif %}
+          {% endif %}
         </div>
-        
-        <p class="review-text">"{{ block.settings.text }}"</p>
         
         <div class="review-author-area">
           <div class="review-avatar">
-            {{ block.settings.author | slice: 0 }}
+            {% if block.settings.author_avatar != blank %}
+              <img src="{{ block.settings.author_avatar | image_url: width: 100 }}" alt="{{ block.settings.author }}" loading="lazy">
+            {% else %}
+              {{ block.settings.author | slice: 0 }}
+            {% endif %}
           </div>
           <div class="review-info">
             <span class="review-name">{{ block.settings.author }}</span>
@@ -137,18 +228,76 @@
 {
   "name": "Resultados y Reseñas",
   "settings": [
-    { "type": "color", "id": "bg_color", "label": "Color de fondo", "default": "#fafafa" },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Color de fondo de la sección",
+      "default": "#fafafa"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Tipografía de la sección",
+      "options": [
+        { "value": "sans-serif", "label": "Moderna / Sistema (Sans-serif)" },
+        { "value": "'Helvetica Neue', Helvetica, Arial, sans-serif", "label": "Minimalista (Helvetica/Arial)" },
+        { "value": "Georgia, 'Times New Roman', serif", "label": "Elegante (Serif / Georgia)" },
+        { "value": "'Trebuchet MS', sans-serif", "label": "Llamativa (Trebuchet)" },
+        { "value": "monospace", "label": "Técnica (Monospace)" }
+      ],
+      "default": "sans-serif"
+    },
     { "type": "text", "id": "title", "label": "Título Principal", "default": "Resultados Reales" },
     { "type": "text", "id": "global_score", "label": "Calificación Global", "default": "4.9" },
-    { "type": "text", "id": "subtitle", "label": "Texto de reseñas totales", "default": "Basado en 13,456 reseñas verificadas" }
+    { "type": "text", "id": "subtitle", "label": "Texto de reseñas totales", "default": "Basado en 13,456 reseñas verificadas" },
+    {
+      "type": "range",
+      "id": "header_spacing",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "label": "Separación interna del encabezado",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "subtitle_margin",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "label": "Separación del encabezado hacia las tarjetas",
+      "default": 20
+    },
+    {
+      "type": "select",
+      "id": "stars_position",
+      "label": "Posición de las estrellas",
+      "options": [
+        { "value": "above", "label": "Arriba del texto" },
+        { "value": "below", "label": "Abajo de la imagen" }
+      ],
+      "default": "above"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_product_tag",
+      "label": "Mostrar producto comprado",
+      "default": true
+    }
   ],
   "blocks": [
     {
       "type": "review",
       "name": "Testimonio",
       "settings": [
-        { "type": "range", "id": "rating", "min": 1, "max": 5, "step": 1, "label": "Estrellas", "default": 5 },
+        { "type": "range", "id": "rating", "min": 1, "max": 5, "step": 1, "label": "Número de Estrellas", "default": 5 },
         { "type": "textarea", "id": "text", "label": "Texto del testimonio", "default": "Sinceramente era escéptica, pero funciona EXACTAMENTE como dicen en TikTok." },
+        { "type": "image_picker", "id": "review_image", "label": "Foto del comentario (Resultado del cliente)" },
+        { "type": "image_picker", "id": "product_image", "label": "Miniatura foto del producto" },
+        { "type": "text", "id": "product_name", "label": "Nombre del producto reseñado", "default": "Nombre del Producto" },
+        { "type": "image_picker", "id": "author_avatar", "label": "Foto de perfil del cliente" },
         { "type": "text", "id": "author", "label": "Nombre del cliente", "default": "Sofía M." },
         { "type": "text", "id": "verified_text", "label": "Texto de compra verificada", "default": "Comprador Verificado" }
       ]
