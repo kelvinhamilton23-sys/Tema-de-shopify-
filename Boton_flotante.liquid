@@ -1,0 +1,163 @@
+<style>
+  /* Contenedor fijo en la parte inferior (Sticky Bottom) */
+  .sticky-buy-wrapper-{{ section.id }} {
+    position: fixed;
+    bottom: 25px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    z-index: 9999;
+    pointer-events: none; /* Permite hacer clic en los elementos detrás del contenedor vacío */
+  }
+
+  /* Estilos base del botón */
+  .sticky-buy-btn-{{ section.id }} {
+    pointer-events: auto; /* Reactiva el clic solo en el botón */
+    background: {{ section.settings.btn_color }};
+    color: {{ section.settings.text_color }};
+    font-size: 17px;
+    font-weight: 900;
+    padding: 16px 20px;
+    border-radius: 50px;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 90%;
+    max-width: 380px;
+    transition: transform 0.1s ease-in-out, box-shadow 0.2s;
+  }
+  
+  .sticky-buy-btn-{{ section.id }}:active {
+    transform: scale(0.96);
+  }
+
+  /* =========================================
+     EFECTO 1: Brillo Pasante (Shine)
+  ========================================= */
+  {% if section.settings.animation_type == 'shine' %}
+  .sticky-buy-btn-{{ section.id }}::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: btnShine 3.5s infinite;
+  }
+  @keyframes btnShine {
+    0% { left: -100%; }
+    20% { left: 200%; }
+    100% { left: 200%; } /* Pausa invisible entre repeticiones */
+  }
+  {% endif %}
+
+  /* =========================================
+     EFECTO 2: Latido de Urgencia (Pulse)
+  ========================================= */
+  {% if section.settings.animation_type == 'pulse' %}
+  .sticky-buy-btn-{{ section.id }} {
+    animation: btnPulse 2s infinite;
+  }
+  @keyframes btnPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4); }
+    70% { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(0, 0, 0, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+  }
+  {% endif %}
+
+  /* =========================================
+     EFECTO 3: Vibración/Sacudida (Wiggle)
+  ========================================= */
+  {% if section.settings.animation_type == 'wiggle' %}
+  .sticky-buy-btn-{{ section.id }} {
+    animation: btnWiggle 3s infinite;
+  }
+  @keyframes btnWiggle {
+    0%, 85%, 100% { transform: rotate(0deg); }
+    88% { transform: rotate(-4deg); }
+    91% { transform: rotate(4deg); }
+    94% { transform: rotate(-4deg); }
+    97% { transform: rotate(4deg); }
+  }
+  {% endif %}
+</style>
+
+<!-- Contenedor del Botón -->
+<div class="sticky-buy-wrapper-{{ section.id }}">
+  <!-- La función onclick hace que suba al inicio de la página suavemente -->
+  <button class="sticky-buy-btn-{{ section.id }}" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">
+    {{ section.settings.btn_icon }} {{ section.settings.btn_text }}
+  </button>
+</div>
+
+{% schema %}
+{
+  "name": "Botón Comprar Flotante",
+  "settings": [
+    {
+      "type": "text",
+      "id": "btn_text",
+      "label": "Texto del botón",
+      "default": "COMPRAR AHORA"
+    },
+    {
+      "type": "text",
+      "id": "btn_icon",
+      "label": "Icono o Emoji (Opcional)",
+      "default": "🛒"
+    },
+    {
+      "type": "color",
+      "id": "btn_color",
+      "label": "Color de fondo del botón",
+      "default": "#22c55e"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "animation_type",
+      "label": "Efecto de Animación",
+      "options": [
+        {
+          "value": "none",
+          "label": "Sin efecto (Estático)"
+        },
+        {
+          "value": "shine",
+          "label": "Brillo Pasante (Línea de luz)"
+        },
+        {
+          "value": "pulse",
+          "label": "Latido (Se expande sutilmente)"
+        },
+        {
+          "value": "wiggle",
+          "label": "Vibración (Se sacude para llamar la atención)"
+        }
+      ],
+      "default": "shine"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Botón Comprar Flotante"
+    }
+  ]
+}
+{% endschema %}
