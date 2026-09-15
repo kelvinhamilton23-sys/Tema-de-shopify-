@@ -1,0 +1,315 @@
+{%- if section.settings.enable_popup -%}
+  <div id="recent-purchase-popup" class="recent-purchase-popup position-{{ section.settings.position }}" style="display: none;">
+    <div class="rpp-close" onclick="closeRecentPopup()">&times;</div>
+    <div class="rpp-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0"/></svg>
+    </div>
+    <div class="rpp-content">
+      <p class="rpp-text">
+        <span id="rpp-buyer" style="font-weight: bold;"></span> <span id="rpp-action">{{ section.settings.action_text }}</span> <strong id="rpp-product"></strong>
+      </p>
+      <small id="rpp-time" class="rpp-time"></small>
+    </div>
+  </div>
+
+  <style>
+    .recent-purchase-popup {
+      position: fixed;
+      bottom: {{ section.settings.distance_bottom }}px;
+      {% if section.settings.position == 'left' %}
+        left: {{ section.settings.distance_side }}px;
+      {% else %}
+        right: {{ section.settings.distance_side }}px;
+      {% endif %}
+      z-index: 99999;
+      background: {{ section.settings.bg_color }};
+      color: {{ section.settings.text_color }};
+      padding: 12px 16px;
+      border-radius: {{ section.settings.border_radius }}px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 320px;
+      font-size: 13px;
+      line-height: 1.4;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      border: 1px solid {{ section.settings.border_color }};
+    }
+
+    .recent-purchase-popup.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .rpp-icon {
+      background: {{ section.settings.accent_bg }};
+      color: {{ section.settings.accent_color }};
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .rpp-content {
+      flex-grow: 1;
+    }
+
+    .rpp-text {
+      margin: 0 0 2px 0;
+    }
+
+    .rpp-time {
+      color: {{ section.settings.time_color }};
+      font-size: 11px;
+    }
+
+    .rpp-close {
+      position: absolute;
+      top: 4px;
+      right: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      color: {{ section.settings.text_color }};
+      opacity: 0.5;
+    }
+
+    .rpp-close:hover {
+      opacity: 1;
+    }
+  </style>
+
+  <script>
+    (function() {
+      function initRecentPopup() {
+        const buyersData = [
+          {%- assign buyers_array = section.settings.buyers_list | newline_to_br | split: '<br />' -%}
+          {%- for b in buyers_array -%}
+            {%- assign clean_b = b | strip -%}
+            {%- if clean_b != blank -%}
+              "{{ clean_b | escape }}"{%- unless forloop.last -%},{%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        ];
+
+        const productsData = [
+          {%- assign products_array = section.settings.products_list | newline_to_br | split: '<br />' -%}
+          {%- for p in products_array -%}
+            {%- assign clean_p = p | strip -%}
+            {%- if clean_p != blank -%}
+              "{{ clean_p | escape }}"{%- unless forloop.last -%},{%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+        ];
+
+        const timesData = ["hace 1 minuto", "hace 3 minutos", "hace 5 minutos", "hace 12 minutos", "hace un momento"];
+
+        const popup = document.getElementById("recent-purchase-popup");
+        if (!popup || buyersData.length === 0 || productsData.length === 0) return;
+
+        function getRandomItem(arr) {
+          return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function showPopup() {
+          if (sessionStorage.getItem("rpp_closed") === "true") return;
+
+          const buyer = getRandomItem(buyersData);
+          const product = getRandomItem(productsData);
+          const time = getRandomItem(timesData);
+
+          document.getElementById("rpp-buyer").innerText = buyer;
+          document.getElementById("rpp-product").innerText = product;
+          document.getElementById("rpp-time").innerText = time;
+
+          popup.style.display = "flex";
+          setTimeout(() => popup.classList.add("show"), 50);
+
+          setTimeout(() => {
+            popup.classList.remove("show");
+            setTimeout(() => popup.style.display = "none", 400);
+          }, {{ section.settings.display_duration }} * 1000);
+        }
+
+        setTimeout(() => {
+          showPopup();
+          setInterval(showPopup, {{ section.settings.repeat_interval }} * 1000);
+        }, {{ section.settings.initial_delay }} * 1000);
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initRecentPopup);
+      } else {
+        initRecentPopup();
+      }
+    })();
+
+    function closeRecentPopup() {
+      const popup = document.getElementById("recent-purchase-popup");
+      if (popup) {
+        popup.classList.remove("show");
+        setTimeout(() => popup.style.display = "none", 400);
+        sessionStorage.setItem("rpp_closed", "true");
+      }
+    }
+  </script>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Pop-up Compras Recientes",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enable_popup",
+      "label": "Habilitar pop-up",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Posición en pantalla",
+      "options": [
+        { "value": "left", "label": "Inferior Izquierda" },
+        { "value": "right", "label": "Inferior Derecha" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "distance_bottom",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Distancia desde el borde inferior",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "distance_side",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Distancia desde el borde lateral",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Textos y Contenido"
+    },
+    {
+      "type": "text",
+      "id": "action_text",
+      "label": "Texto de acción intermedio",
+      "default": "acaba de comprar"
+    },
+    {
+      "type": "textarea",
+      "id": "buyers_list",
+      "label": "Lista de Compradores (Nombre y Ciudad)",
+      "default": "Carlos de Caracas\nMaría de Valencia\nJosé de Maracaibo\nAna de Barquisimeto\nLuis de Maracay",
+      "info": "Escribe un comprador por línea."
+    },
+    {
+      "type": "textarea",
+      "id": "products_list",
+      "label": "Lista de Productos",
+      "default": "Smartwatch Pro Series\nAudífonos Inalámbricos Bass+\nFaja Modeladora Reductora\nLámpara LED Recargable",
+      "info": "Escribe un nombre de producto por línea."
+    },
+    {
+      "type": "header",
+      "content": "Tiempos (en segundos)"
+    },
+    {
+      "type": "range",
+      "id": "initial_delay",
+      "min": 2,
+      "max": 30,
+      "step": 1,
+      "label": "Espera inicial al cargar la página",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "display_duration",
+      "min": 3,
+      "max": 15,
+      "step": 1,
+      "label": "Tiempo visible en pantalla",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "repeat_interval",
+      "min": 5,
+      "max": 60,
+      "step": 5,
+      "label": "Tiempo de espera entre cada pop-up",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Estilos y Colores"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Color de fondo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto principal",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "time_color",
+      "label": "Color de texto de tiempo",
+      "default": "#777777"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Color de borde",
+      "default": "#e5e5e5"
+    },
+    {
+      "type": "color",
+      "id": "accent_bg",
+      "label": "Fondo del icono",
+      "default": "#f0fdf4"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Color del icono",
+      "default": "#16a34a"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "min": 0,
+      "max": 25,
+      "step": 1,
+      "unit": "px",
+      "label": "Radio de las esquinas",
+      "default": 10
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pop-up Compras Recientes"
+    }
+  ]
+}
+{% endschema %}
