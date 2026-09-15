@@ -1,0 +1,322 @@
+<style>
+  /* Variables de color de la sección */
+  :root {
+    --urgency-bg-1-{{ section.id }}: {{ section.settings.bg_color_1 }};
+    --urgency-bg-2-{{ section.id }}: {{ section.settings.bg_color_2 }};
+    --urgency-text-{{ section.id }}: {{ section.settings.text_color }};
+  }
+
+  .urgency-bar-{{ section.id }} {
+    width: 100%;
+    padding: 10px 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    z-index: 1000;
+  }
+
+  /* Contenedor principal con opciones de disposición */
+  .urgency-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  /* Opción 1: Al lado (Inline) */
+  .layout-inline {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+  }
+
+  /* Opción 2: Abajo (Stacked) */
+  .layout-stacked {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .urgency-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--urgency-text-{{ section.id }});
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+  }
+
+  /* =========================================
+     EFECTOS DE LA BARRA (Fondo)
+  ========================================= */
+  
+  .bar-effect-pulse {
+    animation: bgPulse 1.5s infinite alternate;
+  }
+  @keyframes bgPulse {
+    0% { background-color: var(--urgency-bg-1-{{ section.id }}); }
+    100% { background-color: var(--urgency-bg-2-{{ section.id }}); }
+  }
+
+  .bar-effect-gradient {
+    background: linear-gradient(90deg, var(--urgency-bg-1-{{ section.id }}), var(--urgency-bg-2-{{ section.id }}), var(--urgency-bg-1-{{ section.id }}));
+    background-size: 200% 100%;
+    animation: bgFlow 3s linear infinite;
+  }
+  @keyframes bgFlow {
+    0% { background-position: 100% 0; }
+    100% { background-position: -100% 0; }
+  }
+
+  .bar-effect-stripes {
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--urgency-bg-1-{{ section.id }}),
+      var(--urgency-bg-1-{{ section.id }}) 20px,
+      var(--urgency-bg-2-{{ section.id }}) 20px,
+      var(--urgency-bg-2-{{ section.id }}) 40px
+    );
+    background-size: 56px 56px;
+    animation: bgStripes 2s linear infinite;
+  }
+  @keyframes bgStripes {
+    0% { background-position: 0 0; }
+    100% { background-position: -56px 0; }
+  }
+
+  .bar-effect-none {
+    background-color: var(--urgency-bg-1-{{ section.id }});
+  }
+
+  /* =========================================
+     ESTILOS DEL TEMPORIZADOR (Números)
+  ========================================= */
+  .urgency-timer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 800;
+  }
+
+  .t-sep {
+    color: var(--urgency-text-{{ section.id }});
+    font-size: 18px;
+    margin: 0 2px;
+    animation: blinkSep 1s infinite;
+  }
+  @keyframes blinkSep {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .timer-style-minimal .time-block {
+    color: var(--urgency-text-{{ section.id }});
+    font-size: 18px;
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  .timer-style-minimal small { font-size: 12px; opacity: 0.8; }
+
+  .timer-style-blocks .time-block {
+    background: var(--urgency-text-{{ section.id }});
+    color: var(--urgency-bg-1-{{ section.id }});
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
+    min-width: 36px;
+  }
+  .timer-style-blocks small { font-size: 9px; margin-top: 2px; opacity: 0.9; }
+
+  .timer-style-neon .time-block {
+    color: #fff;
+    font-size: 20px;
+    text-shadow: 0 0 5px var(--urgency-text-{{ section.id }}), 0 0 10px var(--urgency-text-{{ section.id }});
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  .timer-style-neon small { font-size: 12px; text-shadow: none; color: var(--urgency-text-{{ section.id }}); }
+
+  /* Ajuste móvil refinado: Centra ambos elementos juntos sin separarlos a los extremos */
+  @media screen and (max-width: 768px) {
+    .urgency-bar-{{ section.id }} {
+      padding: 8px 10px;
+    }
+    .urgency-content.layout-inline {
+      flex-direction: row !important;
+      flex-wrap: nowrap !important;
+      justify-content: center !important;
+      gap: 10px !important;
+    }
+    .urgency-content.layout-inline .urgency-text {
+      font-size: 11px;
+      text-align: right;
+    }
+    .urgency-content.layout-inline .urgency-timer {
+      font-size: 11px;
+      flex-shrink: 0;
+    }
+    .timer-style-blocks .time-block {
+      padding: 2px 4px;
+      font-size: 11px;
+      min-width: 24px;
+    }
+    .timer-style-minimal .time-block, 
+    .timer-style-neon .time-block {
+      font-size: 13px;
+    }
+    .t-sep {
+      font-size: 13px;
+      margin: 0 1px;
+    }
+  }
+</style>
+
+<div class="urgency-bar-{{ section.id }} bar-effect-{{ section.settings.bar_effect }}" id="UrgencyBar-{{ section.id }}">
+  <!-- Aquí se aplica la clase layout-inline o layout-stacked según lo que elijas -->
+  <div class="urgency-content layout-{{ section.settings.layout_style }}">
+    <span class="urgency-text">{{ section.settings.text }}</span>
+    
+    <div class="urgency-timer timer-style-{{ section.settings.timer_style }}" data-end-date="{{ section.settings.end_date }}">
+      <div class="time-block"><span class="t-hrs">00</span><small>H</small></div>
+      <span class="t-sep">:</span>
+      <div class="time-block"><span class="t-min">00</span><small>M</small></div>
+      <span class="t-sep">:</span>
+      <div class="time-block"><span class="t-sec">00</span><small>S</small></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const timerContainer = document.querySelector('#UrgencyBar-{{ section.id }} .urgency-timer');
+    if (!timerContainer) return;
+
+    const endString = timerContainer.getAttribute('data-end-date');
+    let targetDate;
+
+    if (endString && endString.trim() !== '') {
+      targetDate = new Date(endString).getTime();
+    } else {
+      let sessionEnd = localStorage.getItem('urgencyTimerEnd');
+      if (!sessionEnd) {
+        sessionEnd = new Date().getTime() + (2 * 60 * 60 * 1000);
+        localStorage.setItem('urgencyTimerEnd', sessionEnd);
+      }
+      targetDate = parseInt(sessionEnd);
+    }
+
+    const hrsEl = timerContainer.querySelector('.t-hrs');
+    const minEl = timerContainer.querySelector('.t-min');
+    const secEl = timerContainer.querySelector('.t-sec');
+
+    const updateTimer = setInterval(function() {
+      const now = new Date().getTime();
+      const distance = targetDate - now;
+
+      if (distance < 0) {
+        clearInterval(updateTimer);
+        hrsEl.innerHTML = "00";
+        minEl.innerHTML = "00";
+        secEl.innerHTML = "00";
+        if (!endString) localStorage.removeItem('urgencyTimerEnd');
+        return;
+      }
+
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      hrsEl.innerHTML = hours < 10 ? "0" + hours : hours;
+      minEl.innerHTML = minutes < 10 ? "0" + minutes : minutes;
+      secEl.innerHTML = seconds < 10 ? "0" + seconds : seconds;
+    }, 1000);
+  });
+</script>
+
+{% schema %}
+{
+  "name": "Barra de Urgencia",
+  "settings": [
+    {
+      "type": "text",
+      "id": "text",
+      "label": "Texto de la Oferta",
+      "default": "¡OFERTA RELÁMPAGO! ÚLTIMAS HORAS:"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "Fecha Límite (Opcional)",
+      "info": "Formato: AAAA-MM-DD HH:MM:SS (Ej: 2026-12-31 23:59:00). Si lo dejas en blanco, se activará un temporizador 'Evergreen' de 2 horas que se reinicia por usuario."
+    },
+    {
+      "type": "header",
+      "content": "Diseño y Efectos"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Disposición del texto y temporizador",
+      "options": [
+        { "value": "inline", "label": "Al lado (Ahorra espacio)" },
+        { "value": "stacked", "label": "Abajo (Texto arriba, contador abajo)" }
+      ],
+      "default": "inline"
+    },
+    {
+      "type": "color",
+      "id": "bg_color_1",
+      "label": "Color de Fondo 1",
+      "default": "#ff0000"
+    },
+    {
+      "type": "color",
+      "id": "bg_color_2",
+      "label": "Color de Fondo 2",
+      "default": "#990000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del Texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "select",
+      "id": "bar_effect",
+      "label": "Efecto de la Barra",
+      "options": [
+        { "value": "none", "label": "Sin Efecto (Fijo)" },
+        { "value": "pulse", "label": "Parpadeo (Urgencia)" },
+        { "value": "gradient", "label": "Gradiente Dinámico" },
+        { "value": "stripes", "label": "Cinta de Alerta (Franjas)" }
+      ],
+      "default": "pulse"
+    },
+    {
+      "type": "select",
+      "id": "timer_style",
+      "label": "Estilo del Temporizador",
+      "options": [
+        { "value": "minimal", "label": "Minimalista" },
+        { "value": "blocks", "label": "Bloques Sólidos" },
+        { "value": "neon", "label": "Neón / Resplandor" }
+      ],
+      "default": "blocks"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Barra de Urgencia Top"
+    }
+  ]
+}
+{% endschema %}
