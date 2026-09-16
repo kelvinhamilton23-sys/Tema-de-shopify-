@@ -1,0 +1,349 @@
+<style>
+  .miralo-en-accion-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.bg_color }} !important;
+    font-family: {{ section.settings.font_family }};
+    text-align: center;
+  }
+  .miralo-header-{{ section.id }} {
+    max-width: 800px;
+    margin: 0 auto {{ section.settings.header_margin_bottom }}px auto;
+    padding: 0 20px;
+  }
+  .miralo-title-{{ section.id }} {
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: 800;
+    margin-top: 0;
+    margin-bottom: {{ section.settings.title_spacing }}px;
+    color: {{ section.settings.text_color }};
+    line-height: 1.2;
+  }
+  .miralo-subtitle-{{ section.id }} {
+    font-size: {{ section.settings.subtitle_size }}px;
+    color: {{ section.settings.subtitle_color }};
+    margin: 0;
+    line-height: 1.4;
+  }
+  
+  /* Botones de Navegación / Pestañas */
+  .miralo-tabs-{{ section.id }} {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: {{ section.settings.button_gap }}px;
+    margin-bottom: {{ section.settings.button_margin_bottom }}px;
+    padding: 0 20px;
+  }
+  .miralo-tab-btn-{{ section.id }} {
+    padding: 10px 22px;
+    font-size: {{ section.settings.button_font_size }}px;
+    font-family: inherit;
+    font-weight: 700;
+    border: 1px solid {{ section.settings.button_border_color }};
+    background-color: {{ section.settings.button_bg_color }};
+    color: {{ section.settings.button_text_color }};
+    border-radius: {{ section.settings.button_radius }}px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .miralo-tab-btn-{{ section.id }}.active,
+  .miralo-tab-btn-{{ section.id }}:hover {
+    background-color: {{ section.settings.button_active_bg }} !important;
+    color: {{ section.settings.button_active_text }} !important;
+    border-color: {{ section.settings.button_active_bg }} !important;
+  }
+
+  /* Contenedor Único del Video */
+  .miralo-single-container-{{ section.id }} {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .miralo-video-card-{{ section.id }} {
+    display: none;
+    background: {{ section.settings.card_bg }};
+    border: 1px solid {{ section.settings.card_border }};
+    border-radius: {{ section.settings.card_radius }}px;
+    padding: {{ section.settings.card_padding }}px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    text-align: {{ section.settings.card_text_align }};
+  }
+  .miralo-video-card-{{ section.id }}.active {
+    display: block;
+  }
+  .miralo-card-header-{{ section.id }} {
+    font-size: {{ section.settings.card_title_size }}px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    margin-top: 0;
+    margin-bottom: {{ section.settings.card_header_spacing }}px;
+    line-height: 1.3;
+  }
+  .miralo-card-desc-{{ section.id }} {
+    font-size: 14px;
+    color: {{ section.settings.subtitle_color }};
+    margin-top: 0;
+    margin-bottom: {{ section.settings.card_header_spacing }}px;
+    line-height: 1.4;
+  }
+  .miralo-video-wrapper-{{ section.id }} {
+    width: 100%;
+    border-radius: {{ section.settings.video_radius }}px;
+    overflow: hidden;
+    background: #000000;
+    aspect-ratio: {{ section.settings.aspect_ratio }};
+    position: relative;
+  }
+  .miralo-video-wrapper-{{ section.id }} video,
+  .miralo-video-wrapper-{{ section.id }} iframe,
+  .miralo-video-wrapper-{{ section.id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border: none;
+  }
+</style>
+
+<div class="miralo-en-accion-{{ section.id }}">
+  <div class="miralo-header-{{ section.id }}">
+    {% if section.settings.title != blank %}
+      <h2 class="miralo-title-{{ section.id }}">{{ section.settings.title }}</h2>
+    {% endif %}
+
+    {% if section.settings.subtitle != blank %}
+      <p class="miralo-subtitle-{{ section.id }}">{{ section.settings.subtitle }}</p>
+    {% endif %}
+  </div>
+
+  {% if section.blocks.size > 0 %}
+    <div class="miralo-tabs-{{ section.id }}">
+      {% for block in section.blocks %}
+        <button
+          type="button"
+          class="miralo-tab-btn-{{ section.id }} {% if forloop.first %}active{% endif %}"
+          data-target="video-{{ section.id }}-{{ block.id }}"
+        >
+          {{ block.settings.button_label | default: block.settings.title | default: 'Opción' }}
+        </button>
+      {% endfor %}
+    </div>
+
+    <div class="miralo-single-container-{{ section.id }}">
+      {% for block in section.blocks %}
+        <div
+          id="video-{{ section.id }}-{{ block.id }}"
+          class="miralo-video-card-{{ section.id }} {% if forloop.first %}active{% endif %}"
+          {{ block.shopify_attributes }}
+        >
+          {% if block.settings.title != blank %}
+            <h3 class="miralo-card-header-{{ section.id }}">{{ block.settings.title }}</h3>
+          {% endif %}
+
+          {% if block.settings.description != blank %}
+            <p class="miralo-card-desc-{{ section.id }}">{{ block.settings.description }}</p>
+          {% endif %}
+
+          <div class="miralo-video-wrapper-{{ section.id }}">
+            {% if block.settings.video != blank %}
+              {{ block.settings.video | video_tag: autoplay: true, loop: true, muted: true, controls: true, playsinline: true }}
+            {% elsif block.settings.gif_image != blank %}
+              <img src="{{ block.settings.gif_image | image_url }}" alt="{{ block.settings.title | escape }}" loading="lazy" width="{{ block.settings.gif_image.width }}" height="{{ block.settings.gif_image.height }}">
+            {% elsif block.settings.video_url != blank %}
+              {% if block.settings.video_url.type == 'youtube' %}
+                <iframe src="https://www.youtube.com/embed/{{ block.settings.video_url.id }}?autoplay=1&muted=1&loop=1&playlist={{ block.settings.video_url.id }}" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+              {% elsif block.settings.video_url.type == 'vimeo' %}
+                <iframe src="https://player.vimeo.com/video/{{ block.settings.video_url.id }}?autoplay=1&muted=1&loop=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+              {% endif %}
+            {% else %}
+              <div style="display:flex; align-items:center; justify-content:center; height:100%; color:#aaa; font-size:13px; text-align:center; padding:20px;">
+                Selecciona un video o GIF en el editor
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  (function() {
+    function initTabs() {
+      const sectionContainer = document.querySelector('.miralo-en-accion-{{ section.id }}');
+      if (!sectionContainer) return;
+
+      const buttons = sectionContainer.querySelectorAll('.miralo-tab-btn-{{ section.id }}');
+      const cards = sectionContainer.querySelectorAll('.miralo-video-card-{{ section.id }}');
+
+      buttons.forEach(button => {
+        button.onclick = function() {
+          const targetId = this.getAttribute('data-target');
+
+          buttons.forEach(b => b.classList.remove('active'));
+          cards.forEach(c => {
+            c.classList.remove('active');
+            const video = c.querySelector('video');
+            if (video) video.pause();
+          });
+
+          this.classList.add('active');
+          const targetCard = sectionContainer.querySelector('#' + targetId);
+          if (targetCard) {
+            targetCard.classList.add('active');
+            const video = targetCard.querySelector('video');
+            if (video) {
+              video.currentTime = 0;
+              const playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(() => {});
+              }
+            }
+          }
+        };
+      });
+    }
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      initTabs();
+    } else {
+      document.addEventListener('DOMContentLoaded', initTabs);
+    }
+
+    /* Compatibilidad total con el Editor de Shopify */
+    document.addEventListener('shopify:section:load', function(e) {
+      if (e.detail.sectionId === '{{ section.id }}') {
+        initTabs();
+      }
+    });
+
+    document.addEventListener('shopify:block:select', function(e) {
+      const sectionContainer = document.querySelector('.miralo-en-accion-{{ section.id }}');
+      if (sectionContainer) {
+        const blockId = e.detail.blockId;
+        const targetBtn = sectionContainer.querySelector(`[data-target="video-{{ section.id }}-${blockId}"]`);
+        if (targetBtn) targetBtn.click();
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Míralo en Acción (Tabs)",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Textos Principales"
+    },
+    { "type": "text", "id": "title", "label": "Título Principal", "default": "Míralo en Acción" },
+    { "type": "text", "id": "subtitle", "label": "Subtítulo / Descripción", "default": "Selecciona una opción para ver cómo funciona nuestro producto." },
+    
+    {
+      "type": "header",
+      "content": "Estilo y Tipografía"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Tipografía",
+      "options": [
+        { "value": "sans-serif", "label": "Moderna (Sans-serif)" },
+        { "value": "'Helvetica Neue', Helvetica, Arial, sans-serif", "label": "Clean (Helvetica / Arial)" },
+        { "value": "Georgia, 'Times New Roman', serif", "label": "Elegante (Serif)" },
+        { "value": "'Trebuchet MS', sans-serif", "label": "Llamativa (Trebuchet)" },
+        { "value": "monospace", "label": "Técnica (Monospace)" }
+      ],
+      "default": "sans-serif"
+    },
+    { "type": "color", "id": "bg_color", "label": "Fondo de la sección", "default": "#ffffff" },
+    { "type": "color", "id": "text_color", "label": "Color de títulos", "default": "#111111" },
+    { "type": "color", "id": "subtitle_color", "label": "Color de subtítulos y textos", "default": "#666666" },
+
+    {
+      "type": "header",
+      "content": "Estilo de los Botones / Pestañas"
+    },
+    { "type": "color", "id": "button_bg_color", "label": "Fondo del botón (Inactivo)", "default": "#f1f1f1" },
+    { "type": "color", "id": "button_text_color", "label": "Texto del botón (Inactivo)", "default": "#333333" },
+    { "type": "color", "id": "button_border_color", "label": "Borde del botón", "default": "#dddddd" },
+    { "type": "color", "id": "button_active_bg", "label": "Fondo del botón Activo", "default": "#111111" },
+    { "type": "color", "id": "button_active_text", "label": "Texto del botón Activo", "default": "#ffffff" },
+    { "type": "range", "id": "button_font_size", "min": 12, "max": 20, "step": 1, "unit": "px", "label": "Tamaño de texto de botones", "default": 14 },
+    { "type": "range", "id": "button_radius", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Redondeo de botones", "default": 30 },
+    { "type": "range", "id": "button_gap", "min": 5, "max": 30, "step": 1, "unit": "px", "label": "Espacio entre botones", "default": 10 },
+    { "type": "range", "id": "button_margin_bottom", "min": 10, "max": 50, "step": 5, "unit": "px", "label": "Separación Botones - Reproductor", "default": 25 },
+
+    {
+      "type": "header",
+      "content": "Diseño del Reproductor"
+    },
+    { "type": "color", "id": "card_bg", "label": "Fondo del contenedor", "default": "#ffffff" },
+    { "type": "color", "id": "card_border", "label": "Borde del contenedor", "default": "#eeeeee" },
+    {
+      "type": "select",
+      "id": "card_text_align",
+      "label": "Alineación del Texto de los Videos",
+      "options": [
+        { "value": "center", "label": "Centrado" },
+        { "value": "left", "label": "Izquierda" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "aspect_ratio",
+      "label": "Formato del Video / GIF",
+      "options": [
+        { "value": "9 / 16", "label": "Vertical (Estilo TikTok / Reel)" },
+        { "value": "4 / 5", "label": "Vertical Corto" },
+        { "value": "1 / 1", "label": "Cuadrado" },
+        { "value": "16 / 9", "label": "Horizontal (Estilo TV)" }
+      ],
+      "default": "9 / 16"
+    },
+
+    {
+      "type": "header",
+      "content": "Controles de Espaciado y Tamaños"
+    },
+    { "type": "range", "id": "title_size", "min": 20, "max": 48, "step": 2, "unit": "px", "label": "Tamaño Título Principal", "default": 30 },
+    { "type": "range", "id": "subtitle_size", "min": 12, "max": 24, "step": 1, "unit": "px", "label": "Tamaño Subtítulo Principal", "default": 15 },
+    { "type": "range", "id": "card_title_size", "min": 16, "max": 30, "step": 1, "unit": "px", "label": "Tamaño Título del Uso Activo", "default": 20 },
+    { "type": "range", "id": "title_spacing", "min": 0, "max": 30, "step": 2, "unit": "px", "label": "Separación Título - Subtítulo", "default": 8 },
+    { "type": "range", "id": "header_margin_bottom", "min": 10, "max": 60, "step": 5, "unit": "px", "label": "Separación Encabezado - Botones", "default": 20 },
+    { "type": "range", "id": "card_header_spacing", "min": 4, "max": 24, "step": 2, "unit": "px", "label": "Separación Título Uso - Video", "default": 10 },
+    { "type": "range", "id": "padding_top", "min": 10, "max": 100, "step": 5, "unit": "px", "label": "Relleno Superior Sección", "default": 40 },
+    { "type": "range", "id": "padding_bottom", "min": 10, "max": 100, "step": 5, "unit": "px", "label": "Relleno Inferior Sección", "default": 40 },
+    { "type": "range", "id": "card_radius", "min": 0, "max": 30, "step": 2, "unit": "px", "label": "Redondeo del Marco", "default": 16 },
+    { "type": "range", "id": "video_radius", "min": 0, "max": 24, "step": 2, "unit": "px", "label": "Redondeo del Video", "default": 10 },
+    { "type": "range", "id": "card_padding", "min": 10, "max": 40, "step": 2, "unit": "px", "label": "Margen Interno del Marco", "default": 16 },
+    { "type": "range", "id": "max_width", "min": 350, "max": 1000, "step": 10, "unit": "px", "label": "Ancho Máximo del Reproductor", "default": 480 }
+  ],
+  "blocks": [
+    {
+      "type": "video_item",
+      "name": "Opción de Uso / Video",
+      "settings": [
+        { "type": "text", "id": "button_label", "label": "Nombre del Botón (Pestaña)", "default": "Modo 1" },
+        { "type": "text", "id": "title", "label": "Título sobre el Video (Opcional)", "default": "Primer Modo de Uso" },
+        { "type": "text", "id": "description", "label": "Descripción sobre el Video (Opcional)", "default": "Explicación breve de lo que realiza el producto en esta modalidad." },
+        { "type": "video", "id": "video", "label": "Video subido a Shopify (MP4)" },
+        { "type": "image_picker", "id": "gif_image", "label": "O Imagen GIF animada" },
+        { "type": "video_url", "id": "video_url", "label": "O enlace de YouTube/Vimeo", "accept": ["youtube", "vimeo"] }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Míralo en Acción (Tabs)",
+      "blocks": [
+        { "type": "video_item", "settings": { "button_label": "Uso Diario", "title": "Para el día a día" } },
+        { "type": "video_item", "settings": { "button_label": "Modo Deporte", "title": "Para entrenamiento" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
