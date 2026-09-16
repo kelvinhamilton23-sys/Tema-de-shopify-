@@ -1,0 +1,144 @@
+<style>
+  .beneficios-emojis-{{ section.id }} {
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background-color: {{ section.settings.bg_color }} !important;
+    font-family: {{ section.settings.font_family }};
+  }
+  .beneficios-container-{{ section.id }} {
+    max-width: {{ section.settings.max_width }}px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .beneficios-header-{{ section.id }} {
+    text-align: {{ section.settings.align }};
+    font-size: {{ section.settings.title_size }}px;
+    font-weight: 700;
+    color: {{ section.settings.text_color }};
+    margin-top: 0;
+    margin-bottom: {{ section.settings.title_margin_bottom }}px;
+    line-height: 1.2;
+  }
+  .beneficios-list-{{ section.id }} {
+    display: flex;
+    flex-direction: column;
+    gap: {{ section.settings.line_gap }}px;
+    align-items: {% if section.settings.align == 'center' %}center{% elsif section.settings.align == 'right' %}flex-end{% else %}flex-start{% endif %};
+  }
+  .beneficio-item-{{ section.id }} {
+    display: flex;
+    align-items: center;
+    gap: {{ section.settings.emoji_gap }}px;
+    text-align: {{ section.settings.align }};
+  }
+  .beneficio-emoji-{{ section.id }} {
+    font-size: {{ section.settings.emoji_size }}px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .beneficio-text-{{ section.id }} {
+    font-size: {{ section.settings.text_size }}px;
+    color: {{ section.settings.text_color }};
+    line-height: 1.3;
+    margin: 0;
+  }
+</style>
+
+<div class="beneficios-emojis-{{ section.id }}">
+  <div class="beneficios-container-{{ section.id }}">
+    {% if section.settings.title != blank %}
+      <h3 class="beneficios-header-{{ section.id }}">{{ section.settings.title }}</h3>
+    {% endif %}
+
+    <div class="beneficios-list-{{ section.id }}">
+      {% for block in section.blocks %}
+        <div class="beneficio-item-{{ section.id }}" {{ block.shopify_attributes }}>
+          {% if block.settings.emoji != blank %}
+            <span class="beneficio-emoji-{{ section.id }}">{{ block.settings.emoji }}</span>
+          {% endif %}
+          {% if block.settings.text != blank %}
+            <p class="beneficio-text-{{ section.id }}">{{ block.settings.text }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Beneficios con Emojis",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Encabezado (Opcional)"
+    },
+    { "type": "text", "id": "title", "label": "Título del Bloque", "default": "¿Por qué elegirnos?" },
+    { "type": "range", "id": "title_size", "min": 14, "max": 32, "step": 1, "unit": "px", "label": "Tamaño del Título", "default": 18 },
+    { "type": "range", "id": "title_margin_bottom", "min": 0, "max": 40, "step": 2, "unit": "px", "label": "Espacio debajo del Título", "default": 12 },
+    
+    {
+      "type": "header",
+      "content": "Estilo General"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Tipografía",
+      "options": [
+        { "value": "sans-serif", "label": "Moderna (Sans-serif)" },
+        { "value": "'Helvetica Neue', Helvetica, Arial, sans-serif", "label": "Clean (Helvetica / Arial)" },
+        { "value": "Georgia, 'Times New Roman', serif", "label": "Elegante (Serif)" },
+        { "value": "'Trebuchet MS', sans-serif", "label": "Llamativa (Trebuchet)" },
+        { "value": "monospace", "label": "Técnica (Monospace)" }
+      ],
+      "default": "sans-serif"
+    },
+    {
+      "type": "select",
+      "id": "align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centrado" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "left"
+    },
+    { "type": "color", "id": "bg_color", "label": "Fondo de la sección", "default": "transparent" },
+    { "type": "color", "id": "text_color", "label": "Color de texto y título", "default": "#111111" },
+
+    {
+      "type": "header",
+      "content": "Tamaños y Espaciados"
+    },
+    { "type": "range", "id": "text_size", "min": 11, "max": 24, "step": 1, "unit": "px", "label": "Tamaño del Texto", "default": 14 },
+    { "type": "range", "id": "emoji_size", "min": 12, "max": 36, "step": 1, "unit": "px", "label": "Tamaño del Emoji", "default": 18 },
+    { "type": "range", "id": "emoji_gap", "min": 4, "max": 24, "step": 1, "unit": "px", "label": "Separación Emoji - Texto", "default": 10 },
+    { "type": "range", "id": "line_gap", "min": 2, "max": 30, "step": 1, "unit": "px", "label": "Separación entre Líneas (Filas)", "default": 8 },
+    { "type": "range", "id": "padding_top", "min": 0, "max": 60, "step": 2, "unit": "px", "label": "Relleno Superior Sección", "default": 16 },
+    { "type": "range", "id": "padding_bottom", "min": 0, "max": 60, "step": 2, "unit": "px", "label": "Relleno Inferior Sección", "default": 16 },
+    { "type": "range", "id": "max_width", "min": 300, "max": 1000, "step": 10, "unit": "px", "label": "Ancho Máximo del Bloque", "default": 500 }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Línea de Beneficio",
+      "settings": [
+        { "type": "text", "id": "emoji", "label": "Emoji", "default": "🚀" },
+        { "type": "text", "id": "text", "label": "Texto del Beneficio", "default": "Envío rápido a todo el país" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Beneficios con Emojis",
+      "blocks": [
+        { "type": "benefit", "settings": { "emoji": "🚀", "text": "Envío gratis en compras mayores a $50" } },
+        { "type": "benefit", "settings": { "emoji": "⚡", "text": "Despacho inmediato en 24 horas" } },
+        { "type": "benefit", "settings": { "emoji": "🔒", "text": "Pago 100% seguro y garantizado" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
